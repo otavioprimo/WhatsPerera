@@ -16,6 +16,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
 import sasad.android.com.whatsperera.R;
+import sasad.android.com.whatsperera.helper.Base64Custom;
+import sasad.android.com.whatsperera.helper.Preferencias;
 import sasad.android.com.whatsperera.model.Usuario;
 
 public class LoginEmailActivity extends AppCompatActivity {
@@ -67,6 +69,12 @@ public class LoginEmailActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     Toast.makeText(LoginEmailActivity.this, "Logado com sucesso", Toast.LENGTH_SHORT).show();
+
+                    String identificadorUsuarioLogado = Base64Custom.converterBase64(usuario.getEmail());
+
+                    Preferencias preferencias = new Preferencias(LoginEmailActivity.this);
+                    preferencias.salvarDados(identificadorUsuarioLogado);
+
                     abrirTelaPrincipal();
                 } else {
                     Toast.makeText(LoginEmailActivity.this, "Email ou senha inválidos!", Toast.LENGTH_SHORT).show();
@@ -78,6 +86,7 @@ public class LoginEmailActivity extends AppCompatActivity {
     private void abrirTelaPrincipal() {
         Intent intent = new Intent(LoginEmailActivity.this, MainActivity.class);
         startActivity(intent);
+        finish();
     }
 
     private void verificarUsuarioLogado() {

@@ -1,8 +1,10 @@
 package sasad.android.com.whatsperera.Activity;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -11,12 +13,25 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.lang.reflect.Method;
 
 import sasad.android.com.whatsperera.Adapter.TabAdapter;
 import sasad.android.com.whatsperera.R;
+import sasad.android.com.whatsperera.helper.Base64Custom;
+import sasad.android.com.whatsperera.helper.Preferencias;
 import sasad.android.com.whatsperera.helper.SlidingTabLayout;
+import sasad.android.com.whatsperera.model.Contato;
+import sasad.android.com.whatsperera.model.Usuario;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth firebaseAuth;
     private SlidingTabLayout slidingTabLayout;
     private ViewPager viewPager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
         //configurar sliding tab
         slidingTabLayout.setDistributeEvenly(true);
-        slidingTabLayout.setSelectedIndicatorColors(ContextCompat.getColor(this,R.color.colorAccent2));
+        slidingTabLayout.setSelectedIndicatorColors(ContextCompat.getColor(this, R.color.colorAccent2));
 
         //configurar o adapter
         TabAdapter tabAdapter = new TabAdapter(getSupportFragmentManager());
@@ -49,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
 
         slidingTabLayout.setViewPager(viewPager);
 
-        Log.i("logado","Email: " + firebaseAuth.getCurrentUser().getEmail().toString() + "\nUID: " + firebaseAuth.getCurrentUser().getUid().toString());
+        Log.i("logado", "Email: " + firebaseAuth.getCurrentUser().getEmail().toString() + "\nUID: " + firebaseAuth.getCurrentUser().getUid().toString());
 
 
     }
@@ -68,9 +84,10 @@ public class MainActivity extends AppCompatActivity {
 
         switch (item.getItemId()) {
             case R.id.item_sair:
-                deslogarUsuario();
+                dialogDeslogar("Deslogar da sessão atual", "Deseja deslogar desta sessão?");
                 return true;
-            case R.id.item_configuracoes:
+            case R.id.item_adicionar:
+                abrirCadastroContato();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -84,7 +101,112 @@ public class MainActivity extends AppCompatActivity {
         if (firebaseAuth.getCurrentUser() != null) {
             Log.i("logadoMain", "usuario logado");
         } else {
-            Log.i("logadoMain","usuario deslogado");
+            Log.i("logadoMain", "usuario deslogado");
         }
+    }
+
+    private void dialogDeslogar(String titulo, String mensagem) {
+
+        AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+
+        dialog.setTitle(titulo);
+        dialog.setMessage(mensagem);
+        dialog.setCancelable(false);
+        dialog.setIcon(R.drawable.ic_exit_to_app);
+
+        dialog.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(MainActivity.this, "Deslogado", Toast.LENGTH_SHORT).show();
+                deslogarUsuario();
+            }
+        });
+        dialog.setNegativeButton("Não", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        dialog.create();
+        dialog.show();
+    }
+
+    private void abrirCadastroContato() {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+
+        dialog.setTitle("Novo Contato");
+        dialog.setMessage("Email do usuário:");
+        dialog.setCancelable(false);
+        dialog.setIcon(R.drawable.ic_person_add);
+
+        final EditText editText = new EditText(this);
+        editText.setSingleLine(true);
+        editText.setInputType(10);
+        dialog.setView(editText);
+
+        dialog.setPositiveButton("Cadastrar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String emailContato = editText.getText().toString();
+                if (emailContato.isEmpty()) {
+                    Toast.makeText(MainActivity.this, "Preencha o campo e-mail", Toast.LENGTH_SHORT).show();
+                } else {
+                    //verifica se o usuario ja esta cadastrado
+                    final String identificadorContato = Base64Custom.converterBase64(emailContato);
+
+                    //recuperar a instancia do firebase
+                    DatabaseReference databaseReferencia = FirebaseDatabase.getInstance().getReference();
+                    DatabaseReference usuarioReferencia = databaseReferencia.child("usuarios").child(identificadorContato);
+
+                    //fazer uma consulta unica
+                    usuarioReferencia.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.getValue() != null) {
+                                //Recupera dados do contato a ser adicionado
+                                Usuario usuarioContato = new Usuario();
+                                usuarioContato = dataSnapshot.getValue(Usuario.class);
+
+                                //Recuperar dados do usuario logado
+                                Preferencias preferencias = new Preferencias(MainActivity.this);
+                                String identificadorUsuarioLogado = preferencias.getIdenficiador();
+
+                                Contato contato = new Contato();
+                                contato.setIdentificadorUsuario(identificadorContato);
+                                contato.setNome(usuarioContato.getNome());
+                                contato.setEmail(usuarioContato.getEmail());
+
+                                //Salvar dados no firebase
+                                DatabaseReference databaseReferencia = FirebaseDatabase.getInstance().getReference();
+                                DatabaseReference contatoReferencia = databaseReferencia.child("contatos")
+                                                                        .child(identificadorUsuarioLogado)
+                                                                        .child(identificadorContato);
+                                contatoReferencia.setValue(contato);
+
+
+                            } else {
+                                Toast.makeText(MainActivity.this, "Usuário não possui cadastro", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
+                }
+            }
+        });
+
+        dialog.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+
+        dialog.create();
+        dialog.show();
     }
 }

@@ -73,5 +73,4 @@
         android:hint="Digite sua senha"
         android:textColor="@color/textColorPrimary" />
 
-
 </RelativeLayout>

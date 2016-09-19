@@ -19,8 +19,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".Activity.MainActivity" />
-        <activity android:name=".Activity.ValidadorActivity" />
-        <activity android:name=".Activity.LoginActivityTelefone" />
         <activity android:name=".Activity.CadastroUsuarioActivity" />
     </application>
 
