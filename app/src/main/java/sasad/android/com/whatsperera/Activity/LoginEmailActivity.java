@@ -1,6 +1,7 @@
 package sasad.android.com.whatsperera.Activity;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,6 +11,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.github.johnpersano.supertoasts.library.Style;
+import com.github.johnpersano.supertoasts.library.SuperActivityToast;
+import com.github.johnpersano.supertoasts.library.utils.PaletteUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -47,7 +51,13 @@ public class LoginEmailActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (email.getText().toString().isEmpty() || senha.getText().toString().isEmpty()) {
-                    Toast.makeText(LoginEmailActivity.this, "Preencha os campos Email e Senha!", Toast.LENGTH_SHORT).show();
+                    SuperActivityToast.create(LoginEmailActivity.this, new Style(), Style.TYPE_STANDARD)
+                            .setProgressBarColor(Color.WHITE)
+                            .setText("Preencha os campos Email e Senha")
+                            .setDuration(Style.DURATION_MEDIUM)
+                            .setFrame(Style.FRAME_LOLLIPOP)
+                            .setColor(PaletteUtils.getSolidColor(PaletteUtils.MATERIAL_GREEN))
+                            .setAnimations(Style.ANIMATIONS_SCALE).show();
                 } else {
                     usuario = new Usuario();
                     usuario.setEmail(email.getText().toString());
@@ -61,6 +71,8 @@ public class LoginEmailActivity extends AppCompatActivity {
     public void abrirCadastroUsuario(View view) {
         Intent intent = new Intent(LoginEmailActivity.this, CadastroUsuarioActivity.class);
         startActivity(intent);
+        email.setText("");
+        senha.setText("");
     }
 
     private void validarLogin() {
@@ -68,7 +80,7 @@ public class LoginEmailActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(LoginEmailActivity.this, "Logado com sucesso", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(LoginEmailActivity.this, "Logado com sucesso", Toast.LENGTH_SHORT).show();
 
                     String identificadorUsuarioLogado = Base64Custom.converterBase64(usuario.getEmail());
 
@@ -77,7 +89,14 @@ public class LoginEmailActivity extends AppCompatActivity {
 
                     abrirTelaPrincipal();
                 } else {
-                    Toast.makeText(LoginEmailActivity.this, "Email ou senha inválidos!", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(LoginEmailActivity.this, "Email ou senha inválidos!", Toast.LENGTH_SHORT).show();
+                    SuperActivityToast.create(LoginEmailActivity.this, new Style(), Style.TYPE_STANDARD)
+                            .setProgressBarColor(Color.WHITE)
+                            .setText("Email ou senha inválidos!")
+                            .setDuration(Style.DURATION_VERY_SHORT)
+                            .setFrame(Style.FRAME_LOLLIPOP)
+                            .setColor(PaletteUtils.getSolidColor(PaletteUtils.MATERIAL_GREEN))
+                            .setAnimations(Style.ANIMATIONS_SCALE).show();
                 }
             }
         });

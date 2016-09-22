@@ -8,6 +8,7 @@
         android:title="@string/item_configuracoes"
         app:showAsAction="never" />
 
+
     <item
         android:id="@+id/item_sair"
         android:orderInCategory="200"
@@ -27,4 +28,6 @@
         android:orderInCategory="400"
         android:title="Adicionar"
         app:showAsAction="ifRoom" />
+
+
 </menu>

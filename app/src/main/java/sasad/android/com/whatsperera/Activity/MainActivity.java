@@ -2,6 +2,7 @@ package sasad.android.com.whatsperera.Activity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -16,6 +17,9 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.github.johnpersano.supertoasts.library.Style;
+import com.github.johnpersano.supertoasts.library.SuperActivityToast;
+import com.github.johnpersano.supertoasts.library.utils.PaletteUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -39,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth firebaseAuth;
     private SlidingTabLayout slidingTabLayout;
     private ViewPager viewPager;
+    private static long back_pressed;
 
 
     @Override
@@ -66,6 +71,14 @@ public class MainActivity extends AppCompatActivity {
         slidingTabLayout.setViewPager(viewPager);
 
         Log.i("logado", "Email: " + firebaseAuth.getCurrentUser().getEmail().toString() + "\nUID: " + firebaseAuth.getCurrentUser().getUid().toString());
+
+        SuperActivityToast.create(this, new Style(), Style.TYPE_PROGRESS_CIRCLE)
+                .setProgressBarColor(Color.WHITE)
+                .setText("CARREGANDO")
+                .setDuration(Style.DURATION_LONG)
+                .setFrame(Style.FRAME_LOLLIPOP)
+                .setColor(PaletteUtils.getSolidColor(PaletteUtils.MATERIAL_GREEN))
+                .setAnimations(Style.ANIMATIONS_POP).show();
 
 
     }
@@ -117,7 +130,13 @@ public class MainActivity extends AppCompatActivity {
         dialog.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(MainActivity.this, "Deslogado", Toast.LENGTH_SHORT).show();
+                SuperActivityToast.create(MainActivity.this, new Style(), Style.TYPE_STANDARD)
+                        .setProgressBarColor(Color.WHITE)
+                        .setText("DESLOGADO")
+                        .setDuration(Style.DURATION_VERY_SHORT)
+                        .setFrame(Style.FRAME_LOLLIPOP)
+                        .setColor(PaletteUtils.getSolidColor(PaletteUtils.MATERIAL_GREEN))
+                        .setAnimations(Style.ANIMATIONS_SCALE).show();
                 deslogarUsuario();
             }
         });
@@ -208,5 +227,12 @@ public class MainActivity extends AppCompatActivity {
 
         dialog.create();
         dialog.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (back_pressed + 2000 > System.currentTimeMillis()) super.onBackPressed();
+        else Toast.makeText(getBaseContext(),"Toque novamente para sair",Toast.LENGTH_SHORT).show();
+        back_pressed = System.currentTimeMillis();
     }
 }

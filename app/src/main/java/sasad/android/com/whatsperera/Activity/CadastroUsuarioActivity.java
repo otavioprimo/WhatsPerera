@@ -4,6 +4,7 @@ package sasad.android.com.whatsperera.Activity;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +16,10 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.github.johnpersano.supertoasts.library.Style;
+import com.github.johnpersano.supertoasts.library.SuperActivityToast;
+import com.github.johnpersano.supertoasts.library.SuperToast;
+import com.github.johnpersano.supertoasts.library.utils.PaletteUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
@@ -51,16 +56,17 @@ public class CadastroUsuarioActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (nome.getText().toString().isEmpty()) {
-                    Toast.makeText(CadastroUsuarioActivity.this, "Preencha o campo Nome", Toast.LENGTH_SHORT).show();
+                    chamarToastCampos("Preencha o campo Nome");
                 } else if (email.getText().toString().isEmpty()) {
-                    Toast.makeText(CadastroUsuarioActivity.this, "Preencha o campo Email", Toast.LENGTH_SHORT).show();
+                    chamarToastCampos("Preencha o campo Email");
                 } else if (senha.getText().toString().isEmpty()) {
-                    Toast.makeText(CadastroUsuarioActivity.this, "Preencha o campo Senha", Toast.LENGTH_SHORT).show();
+                    chamarToastCampos("Preencha o campo Senha");
                 } else {
                     usuario = new Usuario();
                     usuario.setNome(nome.getText().toString().trim());
                     usuario.setEmail(email.getText().toString().trim());
                     usuario.setSenha(senha.getText().toString().trim());
+                    chamarToastCadastro();
                     cadastrarUsuario();
                 }
             }
@@ -79,13 +85,33 @@ public class CadastroUsuarioActivity extends AppCompatActivity {
 
                     usuario.setId(identificador);
                     usuario.salvar();
-                    Toast.makeText(CadastroUsuarioActivity.this, "Cadastrado com sucesso", Toast.LENGTH_SHORT).show();
+                    SuperToast.create(CadastroUsuarioActivity.this, "CADASTRADO COM SUCESSO", Style.DURATION_SHORT,Style.green()).show();
                     finish();
                 } else {
-                    Toast.makeText(CadastroUsuarioActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(CadastroUsuarioActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    SuperToast.create(CadastroUsuarioActivity.this, task.getException().getMessage(), Style.DURATION_SHORT,Style.green()).show();
                 }
             }
         });
+    }
+
+    private void chamarToastCadastro(){
+        SuperActivityToast.create(this, new Style(), Style.TYPE_PROGRESS_BAR)
+                .setProgressBarColor(Color.WHITE)
+                .setText("VERIFICANDO CADASTRO")
+                .setDuration(Style.DURATION_VERY_SHORT)
+                .setFrame(Style.FRAME_LOLLIPOP)
+                .setColor(PaletteUtils.getSolidColor(PaletteUtils.MATERIAL_GREEN))
+                .setAnimations(Style.ANIMATIONS_POP).show();
+    }
+
+    private void chamarToastCampos(String texto){
+        SuperActivityToast.create(this, new Style(), Style.TYPE_STANDARD)
+                .setText(texto)
+                .setDuration(Style.DURATION_VERY_SHORT)
+                .setFrame(Style.FRAME_LOLLIPOP)
+                .setColor(PaletteUtils.getSolidColor(PaletteUtils.MATERIAL_GREEN))
+                .setAnimations(Style.ANIMATIONS_FADE).show();
     }
 
 
