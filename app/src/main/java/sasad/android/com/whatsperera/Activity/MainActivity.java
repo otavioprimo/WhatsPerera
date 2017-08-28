@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         dialog.setTitle(titulo);
         dialog.setMessage(mensagem);
         dialog.setCancelable(false);
-        dialog.setIcon(R.drawable.ic_exit_to_app);
+        //dialog.setIcon(R.drawable.ic_exit_to_app);
 
         dialog.setPositiveButton("Sim", new DialogInterface.OnClickListener() {
             @Override
