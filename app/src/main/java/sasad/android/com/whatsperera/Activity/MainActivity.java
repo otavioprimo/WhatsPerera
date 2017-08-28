@@ -186,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
                                 Usuario usuarioContato = new Usuario();
                                 usuarioContato = dataSnapshot.getValue(Usuario.class);
 
+
                                 //Recuperar dados do usuario logado
                                 Preferencias preferencias = new Preferencias(MainActivity.this);
                                 String identificadorUsuarioLogado = preferencias.getIdenficiador();
